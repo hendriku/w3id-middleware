@@ -1,5 +1,7 @@
 require(`${__dirname}/assert`)();
 
+
+
 const debug = require('debug')('w3id-middleware:index');
 const saml2 = require('saml2-js');
 
@@ -9,6 +11,9 @@ const md5 = require('md5');
 const moment = require('moment');
 
 const router = require('express').Router();
+
+console.log("Welcome to custom w3id-middleware")
+debug("!!! Imported custom w3id-middleware");
 
 const X509Cert = "-----BEGIN CERTIFICATE-----\n" + process.env.W3ID_CERT + "\n-----END CERTIFICATE-----";
 const SAML_CONFIG = {
