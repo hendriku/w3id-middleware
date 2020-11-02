@@ -1,12 +1,10 @@
 require(`${__dirname}/assert`)()
 
 const saml2 = require("saml2-js")
-
 const cookieParser = require("cookie-parser")
 const bodyParser = require("body-parser")
 const md5 = require("md5")
 const moment = require("moment")
-
 const router = require("express").Router()
 
 const X509Cert = `-----BEGIN CERTIFICATE-----\n${process.env.W3ID_CERT}\n-----END CERTIFICATE-----`
@@ -28,14 +26,19 @@ const idp_options = {
 
 const idp = new saml2.IdentityProvider(idp_options)
 
-const COOKIES_NEEDED_FOR_VALIDATION = ["w3id_name_id", "w3id_sessionid", "w3id_expiration"]
+const COOKIES_NEEDED_FOR_VALIDATION = [
+	"w3id_name_id",
+	"w3id_attributes",
+	"w3id_sessionid",
+	"w3id_expiration"
+]
 const HSTS_HEADER_AGE = 86400
 
-function generateHashForProperties(name_id, sessionID, expiration) {
+function generateHashForProperties(name_id, attributes, sessionID, expiration) {
 	if (process.env.NODE_ENV === "development") {
 		console.debug("generateHashForProperties arguments:", name_id, sessionID, expiration)
 	}
-	const STR = `${name_id}-${sessionID}-${expiration}-${process.env.W3ID_SECRET}`
+	const STR = `${name_id}-${attributes}-${sessionID}-${expiration}-${process.env.W3ID_SECRET}`
 	const hash = md5(STR)
 
 	return hash
@@ -43,6 +46,7 @@ function generateHashForProperties(name_id, sessionID, expiration) {
 
 function clearCookies(res) {
 	res.clearCookie("w3id_name_id")
+	res.clearCookie("w3id_attributes")
 	res.clearCookie("w3id_sessionid")
 	res.clearCookie("w3id_expiration")
 	res.clearCookie("w3id_hash")
@@ -125,6 +129,7 @@ function validateSession(req, res, next) {
 		} else {
 			const hashGeneratedFromCookiesAndSecret = generateHashForProperties(
 				decodeURIComponent(req.cookies.w3id_name_id),
+				decodeURIComponent(req.cookies.w3id_attributes),
 				decodeURIComponent(req.cookies.w3id_sessionid),
 				decodeURIComponent(req.cookies.w3id_expiration)
 			)
@@ -148,6 +153,7 @@ function validateSession(req, res, next) {
 				console.debug("Session is valid. Allowing request to continue.")
 				res.clearCookie("w3id_redirect")
 				res.locals.w3id_name_id = req.cookies.w3id_name_id
+				res.locals.attributes = req.cookies.attributes
 				next()
 			}
 		}
@@ -199,7 +205,12 @@ router.post(
 					const sessionID = saml_response.user.session_index
 					const expiration = saml_response.user.session_not_on_or_after
 
-					const propertyHash = generateHashForProperties(name_id, sessionID, expiration)
+					const propertyHash = generateHashForProperties(
+						name_id,
+						attributes,
+						sessionID,
+						expiration
+					)
 
 					const timeUntilExpirationInMilliseconds =
 						moment(expiration, "YYYY-MM-DD HH:mm:ss").diff(moment()) - 1
@@ -209,12 +220,17 @@ router.post(
 							`COOKIE EXPS >>> expiration: ${expiration} timeUntilExpirationInMilliseconds: ${timeUntilExpirationInMilliseconds}`
 						)
 						console.debug("name_id:", name_id)
+						console.debug("attributes:", attributes)
 						console.debug("sessionID:", sessionID)
 						console.debug("expiration:", expiration)
 						console.debug("Setting hash:", propertyHash)
 					}
 
 					res.cookie("w3id_name_id", name_id, {
+						httpOnly: false,
+						maxAge: timeUntilExpirationInMilliseconds
+					})
+					res.cookie("w3id_attributes", attributes, {
 						httpOnly: false,
 						maxAge: timeUntilExpirationInMilliseconds
 					})
