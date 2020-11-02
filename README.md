@@ -2,6 +2,13 @@
 
 Middleware for servers running Express.js to secure routes with W3ID
 
+Installation:
+
+```bash
+$ npm i git://github.com/hendriku/w3id-middleware#0.3.0
+$ yarn add git://github.com/hendriku/w3id-middleware#0.3.0
+```
+
 ## Description
 
 This middleware uses W3ID to authenticate users of an Express service. Once a users identity has been validated, a session is created for the user that enable them to access routes for the duration of that session.
