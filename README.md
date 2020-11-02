@@ -1,4 +1,5 @@
 # W3ID-Middleware
+
 Middleware for servers running Express.js to secure routes with W3ID
 
 ## Description
@@ -9,54 +10,66 @@ These details for the sessions are stored in the cookies of the client.
 
 ## Features
 
-- Horizontally Scalable
-    - Sessions are created and validated using a shared secret key stored in the environment variables of the application. Each server with this key should be able to validate the authenticity of the session
+-   Horizontally Scalable
 
-- Easy to use
-    - Two lines of code, secure your application.
+    -   Sessions are created and validated using a shared secret key stored in the environment variables of the application. Each server with this key should be able to validate the authenticity of the session
 
-- Redirect support
-    - When the authentication flow has been completed, the user ends up where they wanted to be, not some arbitrary route.
+-   Easy to use
 
-- Invalidation support
-    - The application developer can choose to invalidate a session and challenge the user to reauthenticate at any time.
+    -   Two lines of code, secure your application.
 
-- Configurable Route Protection
-    - Every route can be protected, or only some - it's up to you!
+-   Redirect support
+
+    -   When the authentication flow has been completed, the user ends up where they wanted to be, not some arbitrary route.
+
+-   Invalidation support
+
+    -   The application developer can choose to invalidate a session and challenge the user to reauthenticate at any time.
+
+-   Configurable Route Protection
+    -   Every route can be protected, or only some - it's up to you!
 
 ## Rationale
 
 #### Practicality
+
 I've written this middleware so as to enable IBMers to have the freedom to experiment with new ideas and services without the fear that it will become available to the general public before it's ready.
 
 Developers shouldn't have to spend time thinking about their security strategy, they should be writing and testing their applications. I hope that this middleware serves that purpose.
 
 #### Cost / time Saving
+
 Most of the Node.js projects I've seen with a Passport SAML integration have either used an in-memory session store (which forces services to scale vertically, or create sticky sessions across application instances) or run a database instance to manage the session (which might be rarely used, and has an associated cost).
 
 By using cookies, and having a shared secret across application instances, services can scale horizontally (so if the thing you're testing gets a wider audience, there's no need to rearchitect your solution, just remove the middleware), and there's no need for you to run a database.
 
 ## Usage
 
-Before you can use the W3ID middleware in your application, you will need to register your application with the W3ID self-service systems to create the nesseccary prerequisites. You can find instructions to do so [here](SELF_SERVICE.md) (see the  [Notes and Catch-22s](#notes-and-catch-22s) section in this document for details on considerations you'll have to make whilst registering your app). Once you have done so, you can secure your application using the following steps.
+Before you can use the W3ID middleware in your application, you will need to register your application with the W3ID self-service systems to create the nesseccary prerequisites. You can find instructions to do so [here](SELF_SERVICE.md) (see the [Notes and Catch-22s](#notes-and-catch-22s) section in this document for details on considerations you'll have to make whilst registering your app). Once you have done so, you can secure your application using the following steps.
 
 1. Install the module, and save it as a dependency
+
     ```
     npm i -S w3id-middleware
     ```
 
 2. Require the module in your Express application
+
     ```JavaScript
     const w3id = require('w3id-middleware');
     ```
 
 3. Either:
+
     - Secure all of the routes in your application:
+
     ```JavaScript
     const w3id = require('w3id-middleware');
     app.use(w3id);
     ```
+
     - Secure some of the routes in your application:
+
     ```JavaScript
     const w3id = require('w3id-middleware');
 
@@ -66,6 +79,7 @@ Before you can use the W3ID middleware in your application, you will need to reg
     app.use(w3id); // All routes defined after this point will be protected by the middleware.
     app.get('/everything-else', require('routes/everything-else')); // Like this!
     ```
+
 4. Relax.
 
 ## The Authentication Process
@@ -105,7 +119,7 @@ D. When entering the ACS URL as you register your application with W3ID, it must
 
 ## Registering an app with the W3ID self-service application.
 
-[Diego Hernandez](https://twitter.com/diego_codes) has written an excellent guide to setting yourself up with the W3ID service (his demo application was the basis for my creation of this middleware). 
+[Diego Hernandez](https://twitter.com/diego_codes) has written an excellent guide to setting yourself up with the W3ID service (his demo application was the basis for my creation of this middleware).
 
 A slightly ammended version of the instructions can be found in [SELF_SERVICE.md](SELF_SERVICE.md).
 
@@ -114,7 +128,7 @@ If you have access to IBM's Enterprise GH account, you can find the original the
 ## Required Environment Variables
 
 `W3ID_IDP_LOGIN_URL`
-    
+
 The W3ID login URL generated by the W3ID self-service application. This is the URL that your user will be initially redirected to to provide proof of their identity through W3ID.
 
 `W3ID_PARTNER_ID`
@@ -123,7 +137,7 @@ The unique partner ID you created for you app in the W3ID self-service applicati
 
 `W3ID_CERT`
 
-The *content* of the `<X509Certificate>` element from the XML document generated at the end of the W3ID self-service application - _not the entire element_. The middleware will handle the creation of the certificate headers and footers, so don't do those yourself.
+The _content_ of the `<X509Certificate>` element from the XML document generated at the end of the W3ID self-service application - _not the entire element_. The middleware will handle the creation of the certificate headers and footers, so don't do those yourself.
 
 `W3ID_SECRET`
 
@@ -137,4 +151,26 @@ If set to `development` the authorisation flow will be verbose. **This means log
 
 ## res.locals
 
-For convenience, the user ID of the IBM employee is accessible server side in `res.locals.w3id_userid`.
+For convenience, the name_id (primary email) and the attributes of the IBM employee are accessible server side in `res.locals.w3id_name_id` and `res.locals.w3id_attributes`.
+
+The locals are structured as the following:
+
+```
+	"firstName": ["Max"],
+	"uid": ["123456789"],
+	"lastName": ["Musterman"],
+	"emailaddress": ["Max.Musterman@ibm.com"],
+	"cn": ["Max M Musterman"],
+	"blueGroups": [
+		"cn=BlueGroupName,ou=memberlist,ou=ibmgroups,o=ibm.com",
+        ...
+	]
+```
+
+If you access them (especially from the frontend) you'll have to use:
+
+```
+JSON.parse(decodeURIComponent(cookie.your_field))
+```
+
+To get machine readable data.
