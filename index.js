@@ -1,8 +1,7 @@
 require(`${__dirname}/assert`)();
 
-
-
-const debug = require('debug')('w3id-middleware:index');
+const debug = require('debug')('w3id-middleware:log');
+debug.log =  console.log.bind(console);
 const saml2 = require('saml2-js');
 
 const cookieParser = require('cookie-parser');
@@ -13,7 +12,7 @@ const moment = require('moment');
 const router = require('express').Router();
 
 console.log("Welcome to custom w3id-middleware")
-debug("!!! Imported custom w3id-middleware");
+debug("!!! Imported logger to custom w3id-middleware");
 
 const X509Cert = "-----BEGIN CERTIFICATE-----\n" + process.env.W3ID_CERT + "\n-----END CERTIFICATE-----";
 const SAML_CONFIG = {
