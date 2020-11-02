@@ -1,0 +1,12 @@
+*.snap
+*.ico
+*.lock
+*.png
+*.DS_STORE
+node_modules
+lib
+es
+umd
+build
+src/backend/dist/
+src/backend/storybook/
