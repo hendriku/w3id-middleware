@@ -151,7 +151,7 @@ If set to `development` the authorisation flow will be verbose. **This means log
 
 ## res.locals
 
-For convenience, the name_id (primary email) and the attributes of the IBM employee are accessible server side in `res.locals.w3id_name_id`.
+For convenience, the name_id (primary email) and the attributes of the IBM employee are accessible server side in `res.locals.w3id_name_id` and `res.locals.w3id_attributes`.
 
 The locals are structured as the following:
 
