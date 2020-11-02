@@ -44,7 +44,7 @@ server.on("listening", () => {
 	debug(`TEST SERVER listening on ${bind}`)
 })
 
-it("Should wait for the test server to be ready before running tests", () => {
+it("Should wait for the test server to be ready before running tests", function test() {
 	this.timeout(10000)
 
 	let checker
