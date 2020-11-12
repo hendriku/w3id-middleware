@@ -29,16 +29,17 @@ const idp = new saml2.IdentityProvider(idp_options)
 const COOKIES_NEEDED_FOR_VALIDATION = [
 	"w3id_name_id",
 	"w3id_attributes",
+	"w3id_blueGroups",
 	"w3id_sessionid",
 	"w3id_expiration"
 ]
 const HSTS_HEADER_AGE = 86400
 
-function generateHashForProperties(name_id, attributes, sessionID, expiration) {
+function generateHashForProperties(name_id, sessionID, expiration) {
 	if (process.env.NODE_ENV === "development") {
 		console.debug("generateHashForProperties arguments:", name_id, sessionID, expiration)
 	}
-	const STR = `${name_id}-${attributes}-${sessionID}-${expiration}-${process.env.W3ID_SECRET}`
+	const STR = `${name_id}-${sessionID}-${expiration}-${process.env.W3ID_SECRET}`
 	const hash = md5(STR)
 
 	return hash
@@ -47,6 +48,7 @@ function generateHashForProperties(name_id, attributes, sessionID, expiration) {
 function clearCookies(res) {
 	res.clearCookie("w3id_name_id")
 	res.clearCookie("w3id_attributes")
+	res.clearCookie("w3id_blueGroups")
 	res.clearCookie("w3id_sessionid")
 	res.clearCookie("w3id_expiration")
 	res.clearCookie("w3id_hash")
@@ -129,7 +131,6 @@ function validateSession(req, res, next) {
 		} else {
 			const hashGeneratedFromCookiesAndSecret = generateHashForProperties(
 				decodeURIComponent(req.cookies.w3id_name_id),
-				decodeURIComponent(req.cookies.w3id_attributes),
 				decodeURIComponent(req.cookies.w3id_sessionid),
 				decodeURIComponent(req.cookies.w3id_expiration)
 			)
@@ -154,6 +155,7 @@ function validateSession(req, res, next) {
 				res.clearCookie("w3id_redirect")
 				res.locals.w3id_name_id = req.cookies.w3id_name_id
 				res.locals.attributes = req.cookies.attributes
+				res.locals.blueGroups = req.cookies.blueGroups
 				next()
 			}
 		}
@@ -201,16 +203,25 @@ router.post(
 					}
 
 					const { name_id } = saml_response.user
-					const attributes = JSON.stringify(saml_response.user.attributes)
+					const {
+						firstName,
+						uid,
+						lastName,
+						emailaddress,
+						cn
+					} = saml_response.user.attributes
+					const attributes = JSON.stringify({
+						firstName,
+						lastName,
+						uid,
+						emailaddress,
+						cn
+					})
+					const blueGroups = JSON.stringify(saml_response.user.attributes.blueGroups)
 					const sessionID = saml_response.user.session_index
 					const expiration = saml_response.user.session_not_on_or_after
 
-					const propertyHash = generateHashForProperties(
-						name_id,
-						attributes,
-						sessionID,
-						expiration
-					)
+					const propertyHash = generateHashForProperties(name_id, sessionID, expiration)
 
 					const timeUntilExpirationInMilliseconds =
 						moment(expiration, "YYYY-MM-DD HH:mm:ss").diff(moment()) - 1
@@ -221,6 +232,7 @@ router.post(
 						)
 						console.debug("name_id:", name_id)
 						console.debug("attributes:", attributes)
+						console.debug("blueGroups:", blueGroups)
 						console.debug("sessionID:", sessionID)
 						console.debug("expiration:", expiration)
 						console.debug("Setting hash:", propertyHash)
@@ -231,6 +243,10 @@ router.post(
 						maxAge: timeUntilExpirationInMilliseconds
 					})
 					res.cookie("w3id_attributes", attributes, {
+						httpOnly: false,
+						maxAge: timeUntilExpirationInMilliseconds
+					})
+					res.cookie("w3id_blueGroups", blueGroups, {
 						httpOnly: false,
 						maxAge: timeUntilExpirationInMilliseconds
 					})
