@@ -87,7 +87,7 @@ it(`Should try to access a protected route ('/protected') and should be redirect
 it("Should try to access /protected with a valid session and recieve a 200", () => {
 	return fetch(`http://0.0.0.0:${process.env.port}/protected`, {
 		headers: {
-			cookie: `w3id_name_id=${TEST_USER_ID}; w3id_attributes={}; w3id_sessionid=${TEST_SESSION_ID}; w3id_expiration=${TEST_EXPIRATION_TIME}; w3id_hash=${CURRENT_SESSION_HASH}`
+			cookie: `w3id_name_id=${TEST_USER_ID}; w3id_attributes={}; w3id_blueGroups=[]; w3id_sessionid=${TEST_SESSION_ID}; w3id_expiration=${TEST_EXPIRATION_TIME}; w3id_hash=${CURRENT_SESSION_HASH}`
 		}
 	}).then(res => {
 		if (res.status === 200) {
