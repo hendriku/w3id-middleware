@@ -158,20 +158,16 @@ If set to `development` the authorisation flow will be verbose. **This means log
 
 ## res.locals
 
-For convenience, the name_id (primary email) and the attributes of the IBM employee are accessible server side in `res.locals.w3id_name_id` and `res.locals.w3id_attributes`.
+For convenience, the name_id (primary email) and the attributes of the IBM employee are accessible server side in `res.locals.w3id_name_id`, `res.locals.w3id_attributes`, `w3id_blueGroups`.
 
-The locals are structured as the following:
+The attributes are structured as the following:
 
 ```
 	"firstName": ["Max"],
 	"uid": ["123456789"],
 	"lastName": ["Musterman"],
 	"emailaddress": ["Max.Musterman@ibm.com"],
-	"cn": ["Max M Musterman"],
-	"blueGroups": [
-		"cn=BlueGroupName,ou=memberlist,ou=ibmgroups,o=ibm.com",
-        ...
-	]
+	"cn": ["Max M Musterman"]
 ```
 
 If you access them (especially from the frontend) you'll have to use:

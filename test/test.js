@@ -101,7 +101,7 @@ it("Should try to access /protected with a valid session and recieve a 200", () 
 it("Should try to access /protected with a tampered with session which should then be invalidated, and then redirected to /__auth", () => {
 	return fetch(`http://0.0.0.0:${process.env.port}/protected`, {
 		headers: {
-			cookie: `w3id_name_id=not_the_real_user@valid.place; w3id_sessionid=${TEST_SESSION_ID}; w3id_expiration=${TEST_EXPIRATION_TIME}; w3id_hash=${CURRENT_SESSION_HASH}`
+			cookie: `w3id_name_id=not_the_real_user@valid.place; w3id_attributes={}; w3id_blueGroups=[]; w3id_sessionid=${TEST_SESSION_ID}; w3id_expiration=${TEST_EXPIRATION_TIME}; w3id_hash=${CURRENT_SESSION_HASH}`
 		},
 		redirect: "manual"
 	}).then(res => {
@@ -119,7 +119,7 @@ it("Should try to access /protected with a tampered with session which should th
 it(`Should clear session cookies after the 'w3id_challenge' cookie is set`, () => {
 	return fetch(`http://0.0.0.0:${process.env.port}/protected`, {
 		headers: {
-			cookie: `w3id_name_id=${TEST_USER_ID}; w3id_sessionid=${TEST_SESSION_ID}; w3id_expiration=${TEST_EXPIRATION_TIME}; w3id_hash=${CURRENT_SESSION_HASH}; w3id_challenge=1;`
+			cookie: `w3id_name_id=${TEST_USER_ID}; w3id_attributes={}; w3id_blueGroups=[]; w3id_sessionid=${TEST_SESSION_ID}; w3id_expiration=${TEST_EXPIRATION_TIME}; w3id_hash=${CURRENT_SESSION_HASH}; w3id_challenge=1;`
 		},
 		redirect: "manual"
 	}).then(res => {
@@ -180,7 +180,7 @@ it(`Should detect that the session is too old, clear the session cookies, and re
 
 	return fetch(`http://0.0.0.0:${process.env.port}/protected`, {
 		headers: {
-			cookie: `w3id_name_id=${TEST_USER_ID}; w3id_sessionid=${TEST_SESSION_ID}; w3id_expiration=${OUTDATED_SESSION_TIME}; w3id_hash=${OUTDATED_SESSION_HASH};`
+			cookie: `w3id_name_id=${TEST_USER_ID}; w3id_attributes={}; w3id_blueGroups=[]; w3id_sessionid=${TEST_SESSION_ID}; w3id_expiration=${OUTDATED_SESSION_TIME}; w3id_hash=${OUTDATED_SESSION_HASH};`
 		},
 		redirect: "manual"
 	}).then(res => {

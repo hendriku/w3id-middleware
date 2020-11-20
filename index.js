@@ -154,8 +154,8 @@ function validateSession(req, res, next) {
 				console.debug("Session is valid. Allowing request to continue.")
 				res.clearCookie("w3id_redirect")
 				res.locals.w3id_name_id = req.cookies.w3id_name_id
-				res.locals.attributes = req.cookies.attributes
-				res.locals.blueGroups = req.cookies.blueGroups
+				res.locals.w3id_attributes = req.cookies.w3id_attributes
+				res.locals.w3id_blueGroups = req.cookies.w3id_blueGroups
 				next()
 			}
 		}
