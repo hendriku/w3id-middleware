@@ -5,8 +5,8 @@ Middleware for servers running Express.js to secure routes with W3ID
 Installation:
 
 ```bash
-$ npm i git://github.com/hendriku/w3id-middleware#0.3.0
-$ yarn add git://github.com/hendriku/w3id-middleware#0.3.0
+$ npm i git://github.com/hendriku/w3id-middleware#0.3.2
+$ yarn add git://github.com/hendriku/w3id-middleware#0.3.2
 ```
 
 ## Description
