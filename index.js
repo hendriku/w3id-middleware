@@ -29,7 +29,6 @@ const idp = new saml2.IdentityProvider(idp_options)
 const COOKIES_NEEDED_FOR_VALIDATION = [
 	"w3id_name_id",
 	"w3id_attributes",
-	"w3id_blueGroups",
 	"w3id_sessionid",
 	"w3id_expiration"
 ]
@@ -48,7 +47,6 @@ function generateHashForProperties(name_id, sessionID, expiration) {
 function clearCookies(res) {
 	res.clearCookie("w3id_name_id")
 	res.clearCookie("w3id_attributes")
-	res.clearCookie("w3id_blueGroups")
 	res.clearCookie("w3id_sessionid")
 	res.clearCookie("w3id_expiration")
 	res.clearCookie("w3id_hash")
@@ -155,7 +153,6 @@ function validateSession(req, res, next) {
 				res.clearCookie("w3id_redirect")
 				res.locals.w3id_name_id = req.cookies.w3id_name_id
 				res.locals.w3id_attributes = req.cookies.w3id_attributes
-				res.locals.w3id_blueGroups = req.cookies.w3id_blueGroups
 				next()
 			}
 		}
@@ -217,7 +214,6 @@ router.post(
 						emailaddress,
 						cn
 					})
-					const blueGroups = JSON.stringify(saml_response.user.attributes.blueGroups)
 					const sessionID = saml_response.user.session_index
 					const expiration = saml_response.user.session_not_on_or_after
 
@@ -232,7 +228,6 @@ router.post(
 						)
 						console.debug("name_id:", name_id)
 						console.debug("attributes:", attributes)
-						console.debug("blueGroups:", blueGroups)
 						console.debug("sessionID:", sessionID)
 						console.debug("expiration:", expiration)
 						console.debug("Setting hash:", propertyHash)
@@ -243,10 +238,6 @@ router.post(
 						maxAge: timeUntilExpirationInMilliseconds
 					})
 					res.cookie("w3id_attributes", attributes, {
-						httpOnly: false,
-						maxAge: timeUntilExpirationInMilliseconds
-					})
-					res.cookie("w3id_blueGroups", blueGroups, {
 						httpOnly: false,
 						maxAge: timeUntilExpirationInMilliseconds
 					})
